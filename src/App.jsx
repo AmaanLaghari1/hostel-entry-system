@@ -1,11 +1,11 @@
-import { HostelProvider, useHostel } from "./context/HostelContext";
+import { HostelProvider } from "./context/HostelContext";
 import './assets/css/style.css'
-import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
 
 function App() {
   return (
     <HostelProvider>
-      <Dashboard />
+      <Home />
     </HostelProvider>
   );
 }

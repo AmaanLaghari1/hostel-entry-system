@@ -44,7 +44,7 @@ export default function Login() {
             console.log(response)
             login(response.data)
         } catch (error) {
-            console.log(error.response)
+            console.log(error)
             setError(error.response?.data?.error || "Login failed. Please try again.")
         }
     }
