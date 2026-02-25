@@ -1,17 +1,20 @@
-import { Row, Col, Container } from "react-bootstrap";
+import { Row, Col, Container, Alert, Button } from "react-bootstrap";
 import Header from "../components/Header";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Scanner } from "@yudiel/react-qr-scanner";
-import defaulPic from "../assets/images/default.jpg";
+import defaultPic from "../assets/images/default.jpg";
 
 import {
   faArrowCircleDown,
   faDoorClosed,
   faHome,
-  faTh
+  faTh,
+  faGraduationCap,
+  faUser
 } from "@fortawesome/fontawesome-free-solid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { convertUTCToLocalTime } from "../helper";
 
 export default function Dashboard() {
   const authToken = localStorage.getItem("token");
@@ -20,6 +23,8 @@ export default function Dashboard() {
   const [scanResult, setScanResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [direction, setDirection] = useState("IN");
+  const [error, setError] = useState(null);
+  const [scanTime, setScanTime] = useState(null);
 
   const scanLock = useRef(false);
   const scanTimeout = useRef(null);
@@ -27,13 +32,17 @@ export default function Dashboard() {
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-  const [user, setUser] = useState({
+  const userInitialData = {
     name: "Waiting for scan...",
     hostel: "-",
     room: "-",
     block: "-",
-    image: defaulPic
-  });
+    image: defaultPic,
+    programTitle: "-",
+    rollNo: "-"
+  }
+
+  const [user, setUser] = useState(userInitialData);
 
   // Autofocus Laser Mode
   useEffect(() => {
@@ -49,18 +58,38 @@ export default function Dashboard() {
     scanLock.current = true;
     setScanResult(scannedValue);
     setLoading(true);
+    
+    let payload = {
+      direction,
+      qrcode: scannedValue,
+    }
+    
+    // if scanned value contains digits only, treat it as cnic
+    if(/^\d+$/.test(scannedValue)) {
+      // get last 11 digits for cnic
+      const cnic = scannedValue.slice(-14);
+      // extract last 1 digit from cnic
 
-    const rollNo = scannedValue.split("~")[0];
+      payload = {
+        searchBy: 'cnicNo',
+        rollNo: cnic.slice(0, 13),
+        direction,
+        qrcode: scannedValue,
+      }
+    }
+    else{
+      const rollNo = scannedValue.split("~")[0];
+      payload = {
+        ...payload,
+        searchBy: 'rollNo',
+        rollNo: rollNo
+      }
+    }
 
     try {
       const response = await axios.post(
         `${API_BASE}markLog`,
-        {
-          rollNo,
-          direction,
-          qrcode: scannedValue,
-          // searchBy: rollNo cnicNo
-        },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -70,8 +99,9 @@ export default function Dashboard() {
       );
 
       console.log("API RESPONSE:", response.data);
+      // console.log(response.data.scanTime)
 
-      if (response.data) {
+      if (response?.data) {
         // Base64 extraction from raw string (old method, not used now)
         // let rawImage = response.data.data.image;
         // let base64Image = "";
@@ -101,11 +131,18 @@ export default function Dashboard() {
           hostel: response.data.data.hostelName,
           room: response.data.data.roomNo,
           block: response.data.data.blockName,
+          programTitle: response.data.data.programTitle,
+          rollNo: response.data.data.rollNo,
           image: `data:image/jpeg;base64,${base64String}`
         });
+
+        setScanTime(response.data.scanTime);
       }
     } catch (error) {
+      // console.log('payload: ', payload)
       console.log("API ERROR:", error.response || error);
+      setError(error.response.data.error[0].msg || error.response.data.error || "An error occurred while marking log.");
+      setUser(userInitialData)
     } finally {
       setLoading(false);
 
@@ -144,17 +181,89 @@ export default function Dashboard() {
     }, 120); // 120ms works best for most scanners
   };
 
-  return (
-    <Container fluid className="min-vh-100 d-flex flex-column p-0">
-      <Header />
+  const rollNoInputHandler = async (e) => {
+    const value = e.target.value;
+    console.log("Roll No: " + value);
+    if (value.trim().length > 0) {
+      try {
+        const response = await axios.post(
+          `${API_BASE}markLog`,
+          {
+            searchBy: 'rollNo',
+            rollNo: value.trim(),
+            direction,
+            qrcode: value.trim()
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+        console.log(response);
 
-      <Container fluid className="flex-grow-1 bg-white d-flex align-items-center">
+        const byteArray = new Uint8Array(response.data.data.image.buffer.data);
+
+        // Convert to base64
+        let binary = '';
+        byteArray.forEach(byte => binary += String.fromCharCode(byte));
+        const base64String = btoa(binary);
+
+        setUser({
+          name: response.data.data.firstName,
+          hostel: response.data.data.hostelName,
+          room: response.data.data.roomNo,
+          block: response.data.data.blockName,
+          programTitle: response.data.data.programTitle,
+          rollNo: response.data.data.rollNo,
+          image: `data:image/jpeg;base64,${base64String}`
+        });
+
+        setScanTime(response.data.scanTime);
+      } catch (error) {
+        console.log(error.response || error);
+        setUser(userInitialData)
+        setError(error.response.data.error[0].msg || error.response.data.error || "An error occurred while marking log.");
+      }
+    }
+  }
+
+  // error auto-clear after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  return (
+    <Container fluid className="h-100">
+
+      <Container fluid className="flex-grow-1 bg-white d-flex flex-column align-items-center justify-content-center">
+        {
+          scanTime && (
+              <p className="text-end w-100 pe-3 text-muted fw-bold">
+                Last Scan Time: {convertUTCToLocalTime(scanTime)}
+              </p>
+          )
+        }
         <Row className="border border-2 rounded-5 w-100 mx-3 p-4 shadow-sm">
+          {
+            error && (
+              <Alert variant="danger" className="text-center w-100 mb-4">
+                {error}
+              </Alert>
+            )
+          }
 
           {/* LEFT SIDE */}
           <Col lg={5} className="d-flex flex-column align-items-center">
 
-            <div className="fw-bold bg-primary text-white p-3 rounded-pill w-100 text-center mb-4">
+            <div className="fw-bold bg-dark text-white p-3 rounded-pill w-100 text-center mb-4">
               Scan QR Code
               <FontAwesomeIcon icon={faArrowCircleDown} className="ms-2" />
             </div>
@@ -214,7 +323,7 @@ export default function Dashboard() {
             {/* CAMERA MODE */}
             {scanMode === "CAMERA" && (
               <div className="card p-3 shadow-lg bg-dark rounded-4">
-                <div style={{ width: "260px" }}>
+                <div style={{ width: "150px" }}>
                   <Scanner
                     onScan={handleCameraScan}
                     onError={(err) => console.log("SCAN ERROR:", err)}
@@ -236,6 +345,23 @@ export default function Dashboard() {
                 />
               </div>
             )}
+
+            {
+              scanMode === "ROLL_NO" && (
+                <div className="card p-4 shadow-lg rounded-4">
+                  <input
+                    type="text"
+                    className="form-control form-control-lg text-center"
+                    placeholder="Enter Roll No"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        rollNoInputHandler(e)
+                      }
+                    }}
+                  />
+                </div>
+              )
+            }
 
             {/* {scanResult && (
               <div className="mt-3 text-center">
@@ -280,6 +406,16 @@ export default function Dashboard() {
                   <FontAwesomeIcon icon={faTh} className="me-2 text-primary" />
                   Block: {user.block}
                 </p>
+
+                <p className="fs-4">
+                  <FontAwesomeIcon icon={faGraduationCap} className="me-2 text-primary" />
+                  Program: {user.programTitle || '-'}
+                </p>
+
+                <p className="fs-4">
+                  <FontAwesomeIcon icon={faUser} className="me-2 text-primary" />
+                  Roll No: {user.rollNo || '-'}
+                </p>
               </div>
 
             </div>
@@ -288,10 +424,7 @@ export default function Dashboard() {
         </Row>
       </Container>
 
-      <small className="ps-3 pb-2 text-primary">
-        © 2025 Developed by: Information Technology Services Centre,
-        University of Sindh
-      </small>
+      
     </Container>
   );
 }

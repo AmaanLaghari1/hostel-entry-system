@@ -4,13 +4,24 @@ import { useHostel } from "../context/HostelContext";
 import Register from "./Register";
 import { useState } from "react";
 import Dashboard from "./Dashboard";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Student from "./Student";
+import StudentLog from "./StudentLog";
+import AppLayout from "../components/AppLayout";
 
 export default function Home() {
   const { isLoggedIn } = useHostel()
   const [authSwitch, setAuthSwitch] = useState('login')
   if (isLoggedIn) {
     return (
-        <Dashboard />
+      <Router>
+        <Routes>
+          <Route path="/*" element={<AppLayout><Dashboard /></AppLayout>} />
+          <Route path="/students" element={<AppLayout><Student /></AppLayout>} />
+          <Route path="/student_log" element={<AppLayout><StudentLog /></AppLayout>} />
+        </Routes>
+        
+      </Router>
     );
   }
   else {
