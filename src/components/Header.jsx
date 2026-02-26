@@ -38,20 +38,25 @@ const Header = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto align-items-center">
 
-            <Nav.Link as={Link} to="/dashboard" className="me-3">
-              Dashboard
+            <Nav.Link as={Link} to="/dashboard">
+              <Button className="rounded-0" variant="dark"
+                >
+                <span className="text-white fw-bold">
+                  Dashboard
+                </span>
+              </Button>
             </Nav.Link>
             <Nav.Link as={Link} to="/students">
               <Button className="rounded-0" variant="dark"
-                    onClick={() => {}}
-                >
-                    <span className="text-white fw-bold">
-                         Students
-                    </span>
-                </Button>
+                onClick={() => { }}
+              >
+                <span className="text-white fw-bold">
+                  Students
+                </span>
+              </Button>
             </Nav.Link>
 
-            
+
             <SyncStudents />
 
           </Nav>

@@ -34,13 +34,16 @@ const SyncStudents = () => {
 
     return (
         <div>
-            {loading ? <Loader /> : null}
+            {/* {loading ? <Loader /> : null} */}
             <div className="container p-3">
                 <Button className="rounded-0" variant="dark"
                     onClick={() => syncStudents()}
+                    disabled={loading}
                 >
                     <span className="text-white fw-bold">
-                        Sync Students
+                        {
+                            loading ? 'Syncing...' : 'Sync Students'
+                        }
                     </span>
                 </Button>
             </div>

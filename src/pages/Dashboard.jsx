@@ -1,5 +1,4 @@
 import { Row, Col, Container, Alert, Button } from "react-bootstrap";
-import Header from "../components/Header";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -127,7 +126,7 @@ export default function Dashboard() {
         const base64String = btoa(binary);
 
         setUser({
-          name: response.data.data.firstName,
+          name: response.data.data.firstName +" "+ response.data.data.lastName,
           hostel: response.data.data.hostelName,
           room: response.data.data.roomNo,
           block: response.data.data.blockName,
@@ -211,7 +210,7 @@ export default function Dashboard() {
         const base64String = btoa(binary);
 
         setUser({
-          name: response.data.data.firstName,
+          name: response.data.data.firstName +" "+ response.data.data.lastName,
           hostel: response.data.data.hostelName,
           room: response.data.data.roomNo,
           block: response.data.data.blockName,
@@ -261,7 +260,7 @@ export default function Dashboard() {
           }
 
           {/* LEFT SIDE */}
-          <Col lg={5} className="d-flex flex-column align-items-center">
+          <Col lg={4} className="d-flex flex-column align-items-center">
 
             <div className="fw-bold bg-dark text-white p-3 rounded-pill w-100 text-center mb-4">
               Scan QR Code
@@ -378,7 +377,7 @@ export default function Dashboard() {
           </Col>
 
           {/* RIGHT SIDE */}
-          <Col lg={7} className="d-flex align-items-center">
+          <Col lg={8} className="d-flex align-items-center">
             <div className="d-flex align-items-center gap-4 w-100">
 
               <img
