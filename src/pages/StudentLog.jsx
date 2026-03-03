@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import DataTable from 'react-data-table-component'
 import axios from 'axios'
-import { Button } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router'
 import Loader from '../components/Loader'
 import { convertUTCToLocalTime } from '../helper'
+import { Button } from 'react-bootstrap'
 
 const StudentLog = () => {
   const authToken = localStorage.getItem("token")
@@ -13,8 +13,8 @@ const StudentLog = () => {
   const [students, setStudents] = useState([{}])
   const [loading, setLoading] = useState(false)
 
-  const navigate = useNavigate()
   const location = useLocation()
+  const navigate = useNavigate()
 
   const { rollNo } = location.state || {}
 
@@ -30,7 +30,7 @@ const StudentLog = () => {
             "Content-Type": "application/json"
           }
         })
-      console.log(response)
+      // console.log(response)
       setStudents(response.data.data)
     } catch (error) {
       console.log(error.response)
@@ -113,7 +113,19 @@ const StudentLog = () => {
       {
         loading ? <Loader /> :
           <>
-            <h1 className="mb-4 mt-5">Student Log</h1>
+            <Button
+              variant="dark"
+              className="mt-5 rounded-0"
+              size='sm'
+              onClick={() =>
+                navigate('/students', {
+                  state: location.state
+                })
+              }
+            >
+              ← Back
+            </Button>
+            <h1 className="mb-4">Student Log</h1>
             <input
               type="text"
               placeholder="Search..."

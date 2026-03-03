@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
 import { Button } from "react-bootstrap";
-import Loader from "./Loader";
 
 const SyncStudents = () => {
     const [loading, setLoading] = useState(false);
@@ -35,8 +34,7 @@ const SyncStudents = () => {
     return (
         <div>
             {/* {loading ? <Loader /> : null} */}
-            <div className="container p-3">
-                <Button className="rounded-0" variant="dark"
+                <Button className="rounded-0 ms-2" variant="dark"
                     onClick={() => syncStudents()}
                     disabled={loading}
                 >
@@ -46,7 +44,6 @@ const SyncStudents = () => {
                         }
                     </span>
                 </Button>
-            </div>
 
         </div>
     )

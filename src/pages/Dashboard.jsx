@@ -240,27 +240,27 @@ export default function Dashboard() {
   }, [error]);
 
   return (
-    <Container fluid className="h-100">
+    <Container fluid className="h-100 my-3">
 
       <Container fluid className="flex-grow-1 bg-white d-flex flex-column align-items-center justify-content-center">
         {
           scanTime && (
-              <p className="text-end w-100 pe-3 text-muted fw-bold">
-                Last Scan Time: {convertUTCToLocalTime(scanTime)}
-              </p>
+              <div className="text-end w-100 pe-3 py-2 mt-5 text-muted fw-bold small">
+                Scan Time: {convertUTCToLocalTime(scanTime)}
+              </div>
           )
         }
-        <Row className="border border-2 rounded-5 w-100 mx-3 p-4 shadow-sm">
+        <Row className="border border-2 rounded-5 w-100 mx-3 p-4 shadow-sm position-relative">
           {
             error && (
-              <Alert variant="danger" className="text-center w-100 mb-4">
+              <Alert variant="danger" className="text-center w-100 mb-4 position-absolute top-0 start-0 rounded-4">
                 {error}
               </Alert>
             )
           }
 
           {/* LEFT SIDE */}
-          <Col lg={4} className="d-flex flex-column align-items-center">
+          <Col lg={4} className="d-flex flex-column align-items-center gap-2">
 
             <div className="fw-bold bg-dark text-white p-3 rounded-pill w-100 text-center mb-4">
               Scan QR Code
@@ -289,7 +289,7 @@ export default function Dashboard() {
             </div>
 
             {/* Mode Toggle */}
-            <div className="mb-4">
+            <div className="mb-4 mt-2">
               <button
                 className={`btn me-2 ${
                   scanMode === "LASER" ? "btn-dark" : "btn-outline-dark"
@@ -322,7 +322,7 @@ export default function Dashboard() {
             {/* CAMERA MODE */}
             {scanMode === "CAMERA" && (
               <div className="card p-3 shadow-lg bg-dark rounded-4">
-                <div style={{ width: "150px" }}>
+                <div style={{ width: "100px" }}>
                   <Scanner
                     onScan={handleCameraScan}
                     onError={(err) => console.log("SCAN ERROR:", err)}
@@ -378,7 +378,7 @@ export default function Dashboard() {
 
           {/* RIGHT SIDE */}
           <Col lg={8} className="d-flex align-items-center">
-            <div className="d-flex align-items-center gap-4 w-100">
+            <div className="d-flex align-items-center gap-4 w-100 py-5">
 
               <img
                 // src={!scanLock ? `data:image/jpeg;base64,${user.image}` : user.image}

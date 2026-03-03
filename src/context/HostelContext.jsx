@@ -13,9 +13,15 @@ export const HostelProvider = ({ children }) => {
     }
   };
 
+  const user = () => {
+    const authData = localStorage.getItem("auth");
+    return authData ? JSON.parse(authData) : null;
+  }
+
   const login = (authData) => {
     const { token } = authData;
     localStorage.setItem("token", token);
+    localStorage.setItem("auth", JSON.stringify(authData?.user));
 
     const decoded = parseJwt(token);
     const expiryTime = decoded.exp * 1000;
@@ -48,7 +54,7 @@ export const HostelProvider = ({ children }) => {
   }, []);
 
   return (
-    <HostelContext.Provider value={{ login, logout, isLoggedIn }}>
+    <HostelContext.Provider value={{ login, logout, isLoggedIn, user: user() }}>
       {children}
     </HostelContext.Provider>
   );

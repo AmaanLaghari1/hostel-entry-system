@@ -14,7 +14,7 @@ const Header = () => {
       <Container fluid>
         {/* Logo + Title */}
         <Navbar.Brand className="d-flex align-items-center">
-          <img src={icon} alt="logo" width={55} className="me-3" />
+          <img src={icon} alt="logo" width={55} className="" />
           <div>
             <div
               style={{ letterSpacing: "3px" }}
