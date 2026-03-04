@@ -5,6 +5,8 @@ import { useLocation, useNavigate } from 'react-router'
 import Loader from '../components/Loader'
 import { convertUTCToLocalTime } from '../helper'
 import { Button } from 'react-bootstrap'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const StudentLog = () => {
   const authToken = localStorage.getItem("token")
@@ -107,6 +109,28 @@ const StudentLog = () => {
       .includes(search.toLowerCase())
   );
 
+  const exportToPdf = (columns, data) => {
+    const doc = new jsPDF();
+    columns.pop(); // Remove the last column (Action) from the columns array
+
+    const tableColumn = columns.map(col => col.name);
+
+    const tableRows = data.map((row, rowIndex) =>
+      columns.map(col => {
+        return col.selector(row, rowIndex)
+      }
+    ));
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+
+    doc.text("Student Log", 14, 15);
+    doc.save("student_log.pdf");
+  };
+
   return (
     <div className='w-100 p-3 mt-5' style={{ flexGrow: 1 }}>
 
@@ -133,6 +157,14 @@ const StudentLog = () => {
               onChange={(e) => setSearch(e.target.value)}
               style={{ marginBottom: "10px", padding: "5px" }}
             />
+            <Button
+              variant="secondary"
+              className="ms-1 rounded-0"
+              size='sm'
+              onClick={() => exportToPdf(columns, filteredStudents)}
+            >
+              Export to PDF
+            </Button>
             <DataTable
               columns={columns}
               data={filteredStudents}
