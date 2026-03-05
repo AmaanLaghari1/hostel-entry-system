@@ -99,6 +99,8 @@ const Student = () => {
             navigate('/student_log', {
               state: {
                 rollNo: row.rollNo,
+                hostelName: row.hostelName,
+                hostelForName: row.hostelForName,
                 students: students,
                 search: search
               }
