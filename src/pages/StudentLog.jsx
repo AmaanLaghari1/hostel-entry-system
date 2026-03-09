@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useLocation, useNavigate } from 'react-router'
 import Loader from '../components/Loader'
 import { convertUTCToLocalTime } from '../helper'
-import { Button } from 'react-bootstrap'
+import { Button, Modal } from 'react-bootstrap'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import icon from "../assets/images/right_logo.png";
@@ -15,6 +15,8 @@ const StudentLog = () => {
 
   const [students, setStudents] = useState([{}])
   const [loading, setLoading] = useState(false)
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -33,7 +35,26 @@ const StudentLog = () => {
             "Content-Type": "application/json"
           }
         })
-      // console.log(response)
+      console.log(response.data.data)
+
+      // if image is null, set it to default image
+      response.data.data = response.data.data.map(student => {
+        // convert buffer to base64 string if image exists
+        if (student.image) {
+          console.log(student.image)
+          const byteArray = new Uint8Array(student.image.data.data);
+
+          // Convert to base64
+          let binary = '';
+          byteArray.forEach(byte => binary += String.fromCharCode(byte));
+          const base64String = btoa(binary);
+          student.image = `data:image/jpeg;base64,${base64String}`;
+        } else {
+          student.image = null; // or set to a default image URL
+        }
+        return student;
+      })
+
       setStudents(response.data.data)
     } catch (error) {
       console.log(error.response)
@@ -51,6 +72,21 @@ const StudentLog = () => {
       selector: (row, i) => i + 1,
       sortable: true,
       width: "80px"
+    },
+    {
+      name: "Image",
+      cell: row => (
+        <img
+          src={row.image || 'https://www.undefinedrobotics.org/_app/immutable/assets/logo.tN1ysH9G.png'}
+          alt="Student"
+          style={{ width: "50px", height: "50px", objectFit: "cover", cursor: "pointer" }}
+          onClick={() => {
+            setSelectedImage(row.image);
+            setShowModal(true);
+          }}
+        />
+      ),
+      sortable: true
     },
     {
       name: "Name",
@@ -143,7 +179,8 @@ const StudentLog = () => {
     const tableColumn = columns.map((col) => col.name);
 
     const tableRows = data.map((row, rowIndex) =>
-      columns.map((col) => col.selector(row, rowIndex))
+      // skip image column
+      columns.filter((col) => col.name !== "Image").map((col) => col.selector(row, rowIndex))
     );
 
     // table
@@ -174,7 +211,7 @@ const StudentLog = () => {
 
         doc.text(
           "Developed by Information Technology and Services Centre, University of Sindh",
-          pageWidth / 2,
+          14,
           pageHeight - 8,
           { align: "left" }
         );
@@ -233,6 +270,18 @@ const StudentLog = () => {
               striped
               responsive
             />
+            <Modal show={showModal} onHide={() => setShowModal(false)} size="md" centered>
+              {/* close button */}
+              <Modal.Header className='border-0' closeButton>
+              </Modal.Header>
+              <Modal.Body className="d-flex justify-content-center">
+                <img
+                  src={selectedImage || 'https://www.undefinedrobotics.org/_app/immutable/assets/logo.tN1ysH9G.png'}
+                  alt="Student"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </Modal.Body>
+            </Modal>
           </>
       }
 

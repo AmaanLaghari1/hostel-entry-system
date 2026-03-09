@@ -4,6 +4,10 @@ const HostelContext = createContext();
 
 export const HostelProvider = ({ children }) => {
   const [isLoggedIn, setLoggedIn] = useState(false);
+  const [takePic, setTakePic] = useState(() => {
+    const storedValue = localStorage.getItem("takePhoto");
+    return storedValue ? JSON.parse(storedValue) : false;
+  });
 
   const parseJwt = (token) => {
     try {
@@ -39,6 +43,11 @@ export const HostelProvider = ({ children }) => {
     setLoggedIn(false);
   };
 
+  const toggleTakePhoto = () => {
+    setTakePic(prev => !prev);
+    localStorage.setItem("takePhoto", JSON.stringify(!takePic));
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -54,7 +63,7 @@ export const HostelProvider = ({ children }) => {
   }, []);
 
   return (
-    <HostelContext.Provider value={{ login, logout, isLoggedIn, user: user() }}>
+    <HostelContext.Provider value={{ login, logout, isLoggedIn, user: user(), toggleTakePhoto, takePic }}>
       {children}
     </HostelContext.Provider>
   );

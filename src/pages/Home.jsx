@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Student from "./Student";
 import StudentLog from "./StudentLog";
 import AppLayout from "../components/AppLayout";
+import WebcamCapture from "./WebCamCapture";
 
 export default function Home() {
   const { isLoggedIn } = useHostel()
@@ -17,6 +18,7 @@ export default function Home() {
       <Router>
         <Routes>
           <Route path="/*" element={<AppLayout><Dashboard /></AppLayout>} />
+          {/* <Route path="/" element={<AppLayout><WebcamCapture /></AppLayout>} /> */}
           <Route path="/students" element={<AppLayout><Student /></AppLayout>} />
           <Route path="/student_log" element={<AppLayout><StudentLog /></AppLayout>} />
         </Routes>

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import defaultPic from "../assets/images/default.jpg";
+import { useHostel } from "../context/HostelContext";
 
 import {
   faArrowCircleDown,
@@ -14,6 +15,7 @@ import {
 } from "@fortawesome/fontawesome-free-solid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { convertUTCToLocalTime } from "../helper";
+import WebcamCapture from "./WebCamCapture";
 
 export default function Dashboard() {
   const authToken = localStorage.getItem("token");
@@ -24,6 +26,8 @@ export default function Dashboard() {
   const [direction, setDirection] = useState("IN");
   const [error, setError] = useState(null);
   const [scanTime, setScanTime] = useState(null);
+  // const [takePic, setTakePic] = useState(false);
+  const { toggleTakePhoto, takePic } = useHostel();
 
   const scanLock = useRef(false);
   const scanTimeout = useRef(null);
@@ -57,17 +61,25 @@ export default function Dashboard() {
     scanLock.current = true;
     setScanResult(scannedValue);
     setLoading(true);
-    
+
+    let imageData = null;
+
+    if (takePic) {
+      imageData = await takePhoto();   // wait for capture
+    }
+
     let payload = {
       direction,
       qrcode: scannedValue,
-    }
-    
+      taken_photo: imageData
+    };
+
     // if scanned value contains digits only, treat it as cnic
-    if(/^\d+$/.test(scannedValue)) {
+    if (/^\d+$/.test(scannedValue)) {
       // get last 11 digits for cnic
       const cnic = scannedValue.slice(-14);
       // extract last 1 digit from cnic
+
 
       payload = {
         searchBy: 'cnicNo',
@@ -76,7 +88,7 @@ export default function Dashboard() {
         qrcode: scannedValue,
       }
     }
-    else{
+    else {
       const rollNo = scannedValue.split("~")[0];
       payload = {
         ...payload,
@@ -84,6 +96,8 @@ export default function Dashboard() {
         rollNo: rollNo
       }
     }
+
+    console.log(payload)
 
     try {
       const response = await axios.post(
@@ -96,6 +110,7 @@ export default function Dashboard() {
           }
         }
       );
+
 
       console.log("API RESPONSE:", response.data);
       // console.log(response.data.scanTime)
@@ -126,7 +141,7 @@ export default function Dashboard() {
         const base64String = btoa(binary);
 
         setUser({
-          name: response.data.data.firstName +" "+ response.data.data.lastName,
+          name: response.data.data.firstName + " " + response.data.data.lastName,
           hostel: response.data.data.hostelName,
           room: response.data.data.roomNo,
           block: response.data.data.blockName,
@@ -151,6 +166,17 @@ export default function Dashboard() {
       }, 3000);
     }
   };
+
+  const webcamRef = useRef(null);
+
+  // const takePhoto = () => {
+  //   webcamRef.current?.capture();
+  //   webcamRef.current?.imgSrc && console.log("Photo captured for API:", webcamRef.current.imgSrc);
+  // };
+  const takePhoto = async () => {
+    const img = webcamRef.current?.capture();
+    return img;
+  }
 
   // Camera Scan Handler
   const handleCameraScan = (result) => {
@@ -183,6 +209,9 @@ export default function Dashboard() {
   const rollNoInputHandler = async (e) => {
     const value = e.target.value;
     console.log("Roll No: " + value);
+    if (takePic) {
+      takePhoto();
+    }
     if (value.trim().length > 0) {
       try {
         const response = await axios.post(
@@ -210,7 +239,7 @@ export default function Dashboard() {
         const base64String = btoa(binary);
 
         setUser({
-          name: response.data.data.firstName +" "+ response.data.data.lastName,
+          name: response.data.data.firstName + " " + response.data.data.lastName,
           hostel: response.data.data.hostelName,
           room: response.data.data.roomNo,
           block: response.data.data.blockName,
@@ -240,17 +269,17 @@ export default function Dashboard() {
   }, [error]);
 
   return (
-    <Container fluid className="h-100 my-3">
+    <Container fluid className="h-100 my-3 position-relative">
 
-      <Container fluid className="flex-grow-1 bg-white d-flex flex-column align-items-center justify-content-center">
+      <Container fluid className="flex-grow-1 my-5 rounded-5 d-flex flex-column align-items-center justify-content-center" style={{ paddingTop: '25px' }}>
         {
           scanTime && (
-              <div className="text-end w-100 pe-3 py-2 mt-5 text-muted fw-bold small">
-                Scan Time: {convertUTCToLocalTime(scanTime)}
-              </div>
+            <div className="text-end w-100 pe-3 pt-2 mt-2 text-muted fw-bold small">
+              Scan Time: {convertUTCToLocalTime(scanTime)}
+            </div>
           )
         }
-        <Row className="border border-2 rounded-5 w-100 mx-3 p-4 shadow-sm position-relative">
+        <Row className="border border-2 rounded-5 w-100 mx-3 p-0 shadow-sm position-relative">
           {
             error && (
               <Alert variant="danger" className="text-center w-100 mb-4 position-absolute top-0 start-0 rounded-4">
@@ -260,58 +289,77 @@ export default function Dashboard() {
           }
 
           {/* LEFT SIDE */}
-          <Col lg={4} className="d-flex flex-column align-items-center gap-2">
+          <Col lg={3} className="d-flex flex-column align-items-center gap-2 d-flex flex-column justify-content-center position-relative">
 
-            <div className="fw-bold bg-dark text-white p-3 rounded-pill w-100 text-center mb-4">
-              Scan QR Code
-              <FontAwesomeIcon icon={faArrowCircleDown} className="ms-2" />
+            <div className="mb-auto p-2 w-100">
+              <div className="fw-bold bg-dark text-white p-2 rounded-pill w-100 text-center mb-1">
+                Scan QR Code
+                <FontAwesomeIcon icon={faArrowCircleDown} className="ms-2" />
+              </div>
+              {
+                scanMode !== 'CAMERA' &&
+                <div className="form-check form-switch">
+                  <input type="checkbox" className="form-check-input"
+                    onChange={(e) => {
+                      // setTakePic(e.target.checked);
+                      inputRef.current?.focus();
+                      toggleTakePhoto();
+                    }}
+                    checked={takePic}
+                  /><span className="small">Take Picture</span>
+                </div>
+              }
+              {/* Direction Toggle */}
+              <div className="mb-1 d-flex justify-content-center">
+                <button
+                  className={`btn btn-sm me-2 ${direction === "IN" ? "btn-success" : "btn-outline-success"
+                    }`}
+                  onClick={() => setDirection("IN")}
+                >
+                  IN
+                </button>
+
+                <button
+                  className={`btn btn-sm ${direction === "OUT" ? "btn-danger" : "btn-outline-danger"
+                    }`}
+                  onClick={() => setDirection("OUT")}
+                >
+                  OUT
+                </button>
+              </div>
             </div>
 
-            {/* Direction Toggle */}
-            <div className="mb-3">
-              <button
-                className={`btn me-2 ${
-                  direction === "IN" ? "btn-success" : "btn-outline-success"
-                }`}
-                onClick={() => setDirection("IN")}
-              >
-                IN
-              </button>
-
-              <button
-                className={`btn ${
-                  direction === "OUT" ? "btn-danger" : "btn-outline-danger"
-                }`}
-                onClick={() => setDirection("OUT")}
-              >
-                OUT
-              </button>
-            </div>
+            {
+              takePic && (
+                <WebcamCapture ref={webcamRef} />
+              )
+            }
 
             {/* Mode Toggle */}
-            <div className="mb-4 mt-2">
+            <div className="mb-2 mt-2">
               <button
-                className={`btn me-2 ${
-                  scanMode === "LASER" ? "btn-dark" : "btn-outline-dark"
-                }`}
+                className={`btn btn-sm me-2 ${scanMode === "LASER" ? "btn-dark" : "btn-outline-dark"
+                  }`}
                 onClick={() => setScanMode("LASER")}
               >
                 Laser Mode
               </button>
 
-              <button
-                className={`btn me-2 ${
-                  scanMode === "CAMERA" ? "btn-dark" : "btn-outline-dark"
-                }`}
-                onClick={() => setScanMode("CAMERA")}
-              >
-                Camera Mode
-              </button>
+              {
+                !takePic && (
+                  <button
+                    className={`btn btn-sm me-2 ${scanMode === "CAMERA" ? "btn-dark" : "btn-outline-dark"
+                      }`}
+                    onClick={() => setScanMode("CAMERA")}
+                  >
+                    Camera Mode
+                  </button>
+                )
+              }
 
               <button
-                className={`btn ${
-                  scanMode === "ROLL_NO" ? "btn-dark" : "btn-outline-dark"
-                }`}
+                className={`btn btn-sm ${scanMode === "ROLL_NO" ? "btn-dark" : "btn-outline-dark"
+                  }`}
                 onClick={() => setScanMode("ROLL_NO")}
               >
                 Roll No
@@ -333,11 +381,11 @@ export default function Dashboard() {
 
             {/* LASER MODE */}
             {scanMode === "LASER" && (
-              <div className="card p-4 shadow-lg rounded-4">
+              <div className="card p-4 shadow-lg rounded-4 mb-2">
                 <input
                   ref={inputRef}
                   type="text"
-                  className="form-control form-control-lg text-center"
+                  className="form-control text-center"
                   placeholder="Cursor here"
                   value={machineInput}
                   onChange={handleLaserChange}
@@ -347,10 +395,10 @@ export default function Dashboard() {
 
             {
               scanMode === "ROLL_NO" && (
-                <div className="card p-4 shadow-lg rounded-4">
+                <div className="card p-4 shadow-lg rounded-4 mb-2">
                   <input
                     type="text"
-                    className="form-control form-control-lg text-center"
+                    className="form-control text-center"
                     placeholder="Enter Roll No"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -377,8 +425,8 @@ export default function Dashboard() {
           </Col>
 
           {/* RIGHT SIDE */}
-          <Col lg={8} className="d-flex align-items-center">
-            <div className="d-flex align-items-center gap-4 w-100 py-5">
+          <Col lg={9} className="d-flex align-items-center">
+            <div className="d-flex align-items-center gap-2 w-100 py-5">
 
               <img
                 // src={!scanLock ? `data:image/jpeg;base64,${user.image}` : user.image}
@@ -423,7 +471,7 @@ export default function Dashboard() {
         </Row>
       </Container>
 
-      
+
     </Container>
   );
 }
