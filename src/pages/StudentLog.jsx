@@ -35,13 +35,13 @@ const StudentLog = () => {
             "Content-Type": "application/json"
           }
         })
-      console.log(response.data.data)
+      // console.log(response.data.data)
 
       // if image is null, set it to default image
       response.data.data = response.data.data.map(student => {
         // convert buffer to base64 string if image exists
         if (student.image) {
-          console.log(student.image)
+          // console.log(student.image)
           const byteArray = new Uint8Array(student.image.data.data);
 
           // Convert to base64

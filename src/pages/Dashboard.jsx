@@ -97,7 +97,7 @@ export default function Dashboard() {
       }
     }
 
-    console.log(payload)
+    // console.log(payload)
 
     try {
       const response = await axios.post(
@@ -112,7 +112,7 @@ export default function Dashboard() {
       );
 
 
-      console.log("API RESPONSE:", response.data);
+      // console.log("API RESPONSE:", response.data);
       // console.log(response.data.scanTime)
 
       if (response?.data) {
@@ -160,10 +160,10 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
 
-      // Unlock after 3 seconds
+      // Unlock after 1 seconds
       setTimeout(() => {
         scanLock.current = false;
-      }, 3000);
+      }, 1000);
     }
   };
 
@@ -208,7 +208,7 @@ export default function Dashboard() {
 
   const rollNoInputHandler = async (e) => {
     const value = e.target.value;
-    console.log("Roll No: " + value);
+    // console.log("Roll No: " + value);
     if (takePic) {
       takePhoto();
     }
@@ -229,7 +229,7 @@ export default function Dashboard() {
             }
           }
         );
-        console.log(response);
+        // console.log(response);
 
         const byteArray = new Uint8Array(response.data.data.image.buffer.data);
 

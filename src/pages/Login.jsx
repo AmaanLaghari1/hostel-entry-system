@@ -39,9 +39,16 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if(validate()) {
+            setError("")
+            setSuccess("Logging in...")
+        } else {
+            return;
+        }
+
         try {
             const response = await loginRequest(formData)
-            console.log(response)
+            // console.log(response)
             login(response.data)
         } catch (error) {
             console.log(error)
@@ -50,51 +57,53 @@ export default function Login() {
     }
 
     return (
-        <Card className="border-0" style={{ margin: "auto" }}>
-            <h3 className="text-center mb-3">Login</h3>
+        <div className="min-vh-100 w-100 d-flex flex-column justify-content-center align-items-center p-0">
+            <Card className="col-8 col-sm-4 border-0" style={{ margin: "auto" }}>
+                <h3 className="text-center mb-3">Login</h3>
 
-            {success && <Alert size='sm' variant="success">{success}</Alert>}
-            {error && <Alert size='sm' variant="danger">{error}</Alert>}
+                {success && <Alert size='sm' variant="success">{success}</Alert>}
+                {error && <Alert size='sm' variant="danger">{error}</Alert>}
 
-            <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                    <Form.Label className="fw-bold small">Username<span className="text-danger">*</span></Form.Label>
-                    <Form.Control
-                        className="rounded-0"
-                        size="sm"
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        isInvalid={!!errors.username}
-                        placeholder="Enter username"
-                    />
-                    <Form.Control.Feedback type="invalid" className="rounded-0 small">
-                        {errors.username}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold small">Username<span className="text-danger">*</span></Form.Label>
+                        <Form.Control
+                            className="rounded-0"
+                            size="sm"
+                            type="text"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            isInvalid={!!errors.username}
+                            placeholder="Enter username"
+                        />
+                        <Form.Control.Feedback type="invalid" className="rounded-0 small">
+                            {errors.username}
+                        </Form.Control.Feedback>
+                    </Form.Group>
 
-                <Form.Group className="mb-3">
-                    <Form.Label className="fw-bold small">Password<span className="text-danger">*</span></Form.Label>
-                    <Form.Control
-                        className="rounded-0"
-                        size="sm"
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        isInvalid={!!errors.password}
-                        placeholder="Enter password"
-                    />
-                    <Form.Control.Feedback type="invalid" className="rounded-0 small">
-                        {errors.password}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold small">Password<span className="text-danger">*</span></Form.Label>
+                        <Form.Control
+                            className="rounded-0"
+                            size="sm"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            isInvalid={!!errors.password}
+                            placeholder="Enter password"
+                        />
+                        <Form.Control.Feedback type="invalid" className="rounded-0 small">
+                            {errors.password}
+                        </Form.Control.Feedback>
+                    </Form.Group>
 
-                <Button type="submit" variant="dark" className="w-100 btn-sm rounded-0 mb-3">
-                    Login
-                </Button>
-            </Form>
-        </Card>
+                    <Button type="submit" variant="dark" className="w-100 btn-sm rounded-0 mb-3">
+                        Login
+                    </Button>
+                </Form>
+            </Card>
+        </div>
     );
 }
