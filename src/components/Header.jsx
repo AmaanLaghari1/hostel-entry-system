@@ -4,10 +4,6 @@ import SyncStudents from "./SyncStudents";
 import { Link } from "react-router";
 
 const Header = () => {
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/";
-  };
 
   return (
     <Navbar bg="white" expand="lg" className="py-3 fixed-top">
@@ -38,7 +34,7 @@ const Header = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto align-items-center">
 
-            <Nav.Link as={Link} to="/dashboard">
+            <Nav.Link as={Link} to="/">
               <Button className="rounded-0" variant="dark"
                 >
                 <span className="text-white fw-bold">

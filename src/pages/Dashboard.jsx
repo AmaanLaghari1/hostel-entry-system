@@ -54,6 +54,25 @@ export default function Dashboard() {
     }
   }, [scanMode]);
 
+  // Handle Scan
+  useEffect(() => {
+    const eventSource = new EventSource(API_BASE + "scans/stream");
+
+    eventSource.onmessage = (event) => {
+      const scan = JSON.parse(event.data);
+
+      // console.log("SCAN RECEIVED:", scan);
+      // console.log(scan.code);
+      setDirection(scan.type);
+      setMachineInput(scan.code);
+      // console.log(scan.code);
+      processQRCode(scan.code.trim());
+
+    };
+
+    return () => eventSource.close();
+  }, []);
+
   // Main QR Processing
   const processQRCode = async (scannedValue) => {
     if (!scannedValue || scanLock.current) return;
@@ -189,22 +208,22 @@ export default function Dashboard() {
   };
 
   // AUTO Laser Scan
-  const handleLaserChange = (e) => {
-    const value = e.target.value;
-    setMachineInput(value);
+  // const handleLaserChange = (e) => {
+  //   const value = e.target.value;
+  //   setMachineInput(value);
 
-    if (scanTimeout.current) {
-      clearTimeout(scanTimeout.current);
-    }
+  //   if (scanTimeout.current) {
+  //     clearTimeout(scanTimeout.current);
+  //   }
 
-    // Trigger API when typing stops (scanner finished sending data)
-    scanTimeout.current = setTimeout(() => {
-      if (value.trim().length > 5) {
-        processQRCode(value.trim());
-        setMachineInput("");
-      }
-    }, 120); // 120ms works best for most scanners
-  };
+  //   // Trigger API when typing stops (scanner finished sending data)
+  //   scanTimeout.current = setTimeout(() => {
+  //     if (value.trim().length > 5) {
+  //       processQRCode(value.trim());
+  //       setMachineInput("");
+  //     }
+  //   }, 120); // 120ms works best for most scanners
+  // };
 
   const rollNoInputHandler = async (e) => {
     const value = e.target.value;
@@ -342,7 +361,7 @@ export default function Dashboard() {
                   }`}
                 onClick={() => setScanMode("LASER")}
               >
-                Laser Mode
+                Scanner
               </button>
 
               {
@@ -352,7 +371,7 @@ export default function Dashboard() {
                       }`}
                     onClick={() => setScanMode("CAMERA")}
                   >
-                    Camera Mode
+                    Camera
                   </button>
                 )
               }
@@ -380,7 +399,7 @@ export default function Dashboard() {
             )}
 
             {/* LASER MODE */}
-            {scanMode === "LASER" && (
+            {/* {scanMode === "LASER" && (
               <div className="card p-4 shadow-lg rounded-4 mb-2">
                 <input
                   ref={inputRef}
@@ -391,7 +410,7 @@ export default function Dashboard() {
                   onChange={handleLaserChange}
                 />
               </div>
-            )}
+            )} */}
 
             {
               scanMode === "ROLL_NO" && (
