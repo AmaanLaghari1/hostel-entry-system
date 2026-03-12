@@ -185,7 +185,7 @@ const StudentLog = () => {
 
     // table
     autoTable(doc, {
-      head: [tableColumn],
+      head: [tableColumn.filter((col) => col !== "Image")],
       body: tableRows,
       startY: headerY + 15, // dynamic start below header
       theme: "grid",
@@ -198,6 +198,7 @@ const StudentLog = () => {
         fillColor: [0, 0, 0],
         textColor: 255,
         valign: "center",
+        cellPadding: 3,
       },
       columnStyles: {
         0: { cellWidth: "auto" },
