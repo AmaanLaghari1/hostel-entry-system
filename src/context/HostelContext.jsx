@@ -63,7 +63,7 @@ export const HostelProvider = ({ children }) => {
   }, []);
 
   return (
-    <HostelContext.Provider value={{ login, logout, isLoggedIn, user: user(), toggleTakePhoto, takePic }}>
+    <HostelContext.Provider value={{ login, logout, isLoggedIn, user: user(), auth: user(), toggleTakePhoto, takePic }}>
       {children}
     </HostelContext.Provider>
   );

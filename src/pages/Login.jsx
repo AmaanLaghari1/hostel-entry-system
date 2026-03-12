@@ -51,6 +51,7 @@ export default function Login() {
             // console.log(response)
             login(response.data)
         } catch (error) {
+            setSuccess("")
             console.log(error)
             setError(error.response?.data?.error || "Login failed. Please try again.")
         }

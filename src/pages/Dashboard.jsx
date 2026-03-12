@@ -27,7 +27,7 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [scanTime, setScanTime] = useState(null);
   // const [takePic, setTakePic] = useState(false);
-  const { toggleTakePhoto, takePic } = useHostel();
+  const { toggleTakePhoto, takePic, auth } = useHostel();
 
   const scanLock = useRef(false);
   const scanTimeout = useRef(null);
@@ -92,6 +92,7 @@ export default function Dashboard() {
     }
 
     let payload = {
+      hostelForID: auth.hostelForID,
       direction,
       qrcode: scannedValue,
       taken_photo: imageData
@@ -240,6 +241,7 @@ export default function Dashboard() {
         const response = await axios.post(
           `${API_BASE}markLog`,
           {
+            hostelForID: auth.hostelForID,
             searchBy: 'rollNo',
             rollNo: value.trim(),
             direction,
@@ -444,6 +446,9 @@ export default function Dashboard() {
                       if (e.key === "Enter") {
                         rollNoInputHandler(e)
                       }
+                    }}
+                    onInput={(e) => {
+                      e.target.value = e.target.value.toUpperCase();
                     }}
                   />
                 </div>
