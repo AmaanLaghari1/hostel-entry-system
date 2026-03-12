@@ -52,7 +52,10 @@ export default function Dashboard() {
     if (scanMode === "LASER") {
       inputRef.current?.focus();
     }
-  }, [scanMode]);
+    else if (direction === "HOME") {
+      setScanMode("ROLL_NO");
+    }
+  }, [scanMode, direction]);
 
   // Handle Scan
   useEffect(() => {
@@ -63,11 +66,12 @@ export default function Dashboard() {
 
       // console.log("SCAN RECEIVED:", scan);
       // console.log(scan.code);
-      setDirection(scan.type);
-      setMachineInput(scan.code);
-      // console.log(scan.code);
-      processQRCode(scan.code.trim());
-
+      if (scan.code && scan.code.trim().length > 0){
+        // console.log(scan.code);
+        setMachineInput(scan.code);
+        setDirection(scan.type);
+        processQRCode(scan.code.trim());
+      }
     };
 
     return () => eventSource.close();
@@ -301,7 +305,7 @@ export default function Dashboard() {
         <Row className="border border-2 rounded-5 w-100 mx-3 p-0 shadow-sm position-relative">
           {
             error && (
-              <Alert variant="danger" className="text-center w-100 mb-4 position-absolute top-0 start-0 rounded-4">
+              <Alert variant="danger" className="text-center w-100 mb-4 position-absolute top-0 start-0 rounded-4 z-1">
                 {error}
               </Alert>
             )
@@ -339,6 +343,17 @@ export default function Dashboard() {
                 </button>
 
                 <button
+                  className={`btn btn-sm me-2 ${direction === "HOME" ? "btn-primary" : "btn-outline-primary"
+                    }`}
+                  onClick={() => {
+                    setDirection("HOME")
+                    setScanMode("ROLL_NO")
+                  }}
+                >
+                  HOME
+                </button>
+
+                <button
                   className={`btn btn-sm ${direction === "OUT" ? "btn-danger" : "btn-outline-danger"
                     }`}
                   onClick={() => setDirection("OUT")}
@@ -359,7 +374,10 @@ export default function Dashboard() {
               <button
                 className={`btn btn-sm me-2 ${scanMode === "LASER" ? "btn-dark" : "btn-outline-dark"
                   }`}
-                onClick={() => setScanMode("LASER")}
+                onClick={() => {
+                  setScanMode("LASER")
+                  setDirection("IN")
+                }}
               >
                 Scanner
               </button>
@@ -369,7 +387,10 @@ export default function Dashboard() {
                   <button
                     className={`btn btn-sm me-2 ${scanMode === "CAMERA" ? "btn-dark" : "btn-outline-dark"
                       }`}
-                    onClick={() => setScanMode("CAMERA")}
+                    onClick={() => {
+                      setScanMode("CAMERA")
+                      setDirection("IN")
+                    }}
                   >
                     Camera
                   </button>
@@ -387,7 +408,7 @@ export default function Dashboard() {
             </div>
 
             {/* CAMERA MODE */}
-            {scanMode === "CAMERA" && (
+            {scanMode === "CAMERA" && direction !== "HOME" && (
               <div className="card p-3 shadow-lg bg-dark rounded-4">
                 <div style={{ width: "100px" }}>
                   <Scanner
@@ -413,7 +434,7 @@ export default function Dashboard() {
             )} */}
 
             {
-              scanMode === "ROLL_NO" && (
+              (scanMode === "ROLL_NO" || direction === "HOME") && (
                 <div className="card p-4 shadow-lg rounded-4 mb-2">
                   <input
                     type="text"
