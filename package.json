@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "electron": "electron .",
     "electron:dev": "concurrently \"vite\" \"electron .\"",
-    "electron:build": "electron-builder"
+    "electron:build": "electron-builder",
+    "build_electron": "npm run build && npm run electron:build"
   },
   "build": {
     "appId": "com.hostel.project",
