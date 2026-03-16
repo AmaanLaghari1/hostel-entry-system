@@ -1,16 +1,16 @@
 import Login from "./Login";
 import { useHostel } from "../context/HostelContext";
 import Register from "./Register";
-import { useState } from "react";
+// import { useState } from "react";
 import Dashboard from "./Dashboard";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Student from "./Student";
 import StudentLog from "./StudentLog";
 import AppLayout from "../components/AppLayout";
 
 export default function Home() {
   const { isLoggedIn } = useHostel()
-  const [authSwitch, setAuthSwitch] = useState('login')
+  // const [authSwitch, setAuthSwitch] = useState('login')
     return (
       <Router>
         <Routes>

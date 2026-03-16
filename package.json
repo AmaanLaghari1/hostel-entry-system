@@ -1,5 +1,6 @@
 {
   "name": "hostel_project",
+  "homepage": "./",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +11,23 @@
     "preview": "vite preview",
     "electron": "electron .",
     "electron:dev": "concurrently \"vite\" \"electron .\"",
-    "electron:build ": "electron-builder"
+    "electron:build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.hostel.project",
+    "productName": "hostel entry-system",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    }
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
