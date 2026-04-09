@@ -106,10 +106,9 @@ export default function Dashboard() {
 
 
       payload = {
+        ...payload,
         searchBy: 'cnicNo',
-        rollNo: cnic.slice(0, 13),
-        direction,
-        qrcode: scannedValue,
+        rollNo: cnic.slice(0, 13)
       }
     }
     else {
